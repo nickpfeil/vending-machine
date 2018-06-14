@@ -1,13 +1,15 @@
 package com.techelevator;
 
+import java.math.BigDecimal;
+
 public class Snack {
 	private String name;
-	private double cost;
+	private BigDecimal cost;
 	private String type;
 	private String consumeSound;
 	private int quantity;
 
-	public Snack(String name, double cost, String type) {
+	public Snack(String name, BigDecimal cost, String type) {
 		this.name = name;
 		this.cost = cost;
 		this.type = type;
@@ -23,6 +25,10 @@ public class Snack {
 		}
 	}
 
+	@Override
+	public String toString() {
+		return this.getName() + "\t" + this.getCost() + "   remaining: " + this.getQuantity();
+	}
 
 	public int getQuantity() {
 		return quantity;
@@ -40,12 +46,8 @@ public class Snack {
 		this.name = name;
 	}
 
-	public double getCost() {
+	public BigDecimal getCost() {
 		return cost;
-	}
-
-	public void setCost(double cost) {
-		this.cost = cost;
 	}
 
 	public String getType() {
@@ -58,11 +60,6 @@ public class Snack {
 
 	public String getConsumeSound() {
 		return consumeSound;
-	}
-
-	public void setConsumeSound(String consumeSound) {
-		this.consumeSound = consumeSound;
-
 	}
 
 }
