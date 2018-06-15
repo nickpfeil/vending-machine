@@ -1,5 +1,5 @@
 package com.techelevator;
-
+import java.text.DecimalFormat;
 import java.io.File;
 import java.io.PrintWriter;
 import java.math.BigDecimal;
@@ -10,10 +10,11 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Scanner;
 import java.util.Set;
+import java.util.TreeMap;
 
 public class Inventory {
 	// attributes
-	protected HashMap<String, Snack> inventoryAccess = new HashMap<String, Snack>();
+	protected TreeMap<String, Snack> inventoryAccess = new TreeMap<String, Snack>();
 	private double totalSales;
 	// constructor
 	public Inventory() {
