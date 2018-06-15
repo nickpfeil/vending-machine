@@ -1,9 +1,13 @@
 package com.techelevator;
 
 import java.io.File;
+
 import java.io.FileNotFoundException;
+import java.io.PrintWriter;
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.util.Date;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.Set;
@@ -12,6 +16,8 @@ import com.techelevator.view.Menu;
 
 public class VendingMachineCLI {
 	
+	private File auditLog;
+	private PrintWriter diskFile;
 	private BigDecimal userFunds = new BigDecimal("0");
 	private ArrayList<String> consumeSounds = new ArrayList<String>();
 	private static final String MAIN_MENU_OPTION_DISPLAY_ITEMS = "Display Vending Machine Items"; // define a constant																	// for menu text
@@ -31,6 +37,12 @@ public class VendingMachineCLI {
 	private Menu menu;
 
 	public VendingMachineCLI(Menu menu) {
+		auditLog = new File("audit_log.txt");
+		try {
+			diskFile = new PrintWriter(auditLog);
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
 		this.menu = menu;
 	}
 
@@ -51,6 +63,7 @@ public class VendingMachineCLI {
 			} else if (choice.equals(MAIN_MENU_OPTION_PURCHASE)) {
 				purchaseMenu(machineInventory);
 			} else if (choice.equals(MAIN_MENU_OPTION_EXIT)) {
+				diskFile.close();
 				return;
 			}
 		}
@@ -68,7 +81,9 @@ public class VendingMachineCLI {
 			if (money.equals("Q")) {
 				return;
 			} else if (money.equals("1") || money.equals("2") || money.equals("5") || money.equals("10")) {
+				BigDecimal previousFunds = this.userFunds;
 				this.userFunds = userFunds.add(new BigDecimal(money));
+				audit("FEED MONEY", previousFunds);
 			} else {
 				continue;
 			}
@@ -109,14 +124,16 @@ public class VendingMachineCLI {
 					if ((this.userFunds.compareTo(machine.inventoryAccess.get(item).getCost()) > 0) 
 							&& (machine.inventoryAccess.get(item).getQuantity() > 0)) {
 						// subtract snack price from userFunds
+						BigDecimal previousFunds = this.userFunds;
 						this.userFunds = this.userFunds.subtract(machine.inventoryAccess.get(item).getCost());
+						//send report to audit log
+						audit(machine.inventoryAccess.get(item).getName() + " " + slot, previousFunds);
 						// Output item purchased
 						System.out.print("You Purchased: " + machine.inventoryAccess.get(item).getName() + " ");
 						// Delete 1 item from quantity value
 						machine.inventoryAccess.get(item).setQuantity(machine.inventoryAccess.get(item).getQuantity() -1);
 						// Output consumeSound
 						consumeSounds.add(machine.inventoryAccess.get(item).getConsumeSound());
-						//System.out.println(machine.inventoryAccess.get(item).getConsumeSound());
 						// Print quantity of snacks left
 						System.out.println("and there are " + machine.inventoryAccess.get(item).getQuantity() + " " +
 											machine.inventoryAccess.get(item).getName() + "'s remaining");
@@ -139,6 +156,7 @@ public class VendingMachineCLI {
 	}
 	
 	public void makeChange() {
+		BigDecimal previousFunds = this.userFunds;
 		this.userFunds = this.userFunds.multiply(new BigDecimal("100"));
 		double parseFunds = Double.parseDouble(this.userFunds.toString());
 		int totalFunds = (int)parseFunds;
@@ -171,8 +189,20 @@ public class VendingMachineCLI {
 		for(String sound : consumeSounds) {
 			System.out.println(sound);
 		}
-		System.exit(0);
-		
+		this.userFunds = new BigDecimal("0");
+		audit("GIVE CHANGE", previousFunds);
+		return;
+	}
+	
+	public void audit(String action, BigDecimal previousFunds) {
+		DateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy hh:mm:ss aa");
+		String dateLine = dateFormat.format(new Date()).toString();
+		try {
+			diskFile.printf("%1$-20s %2$-18s %3$-9s %4$5s", dateLine, action, "$" + String.format("%.2f", previousFunds), "$" + String.format("%.2f", this.userFunds) + "\n");
+		}
+		catch(Exception e) {
+			e.printStackTrace();
+		}
 	}
 	
 	public static void main(String[] args) {
