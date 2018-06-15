@@ -14,7 +14,7 @@ public class Snack {
 		this.cost = cost;
 		this.type = type;
 		this.quantity = 5;
-		if (this.type.equals("chip")) {
+		if (this.type.equals("Chip")) {
 			this.consumeSound = "Crunch Crunch Yum!";
 		} else if (this.type.equals("Candy")) {
 			this.consumeSound = "Munch Munch, Yum!";
