@@ -17,6 +17,8 @@ import com.techelevator.view.Menu;
 public class VendingMachineCLI {
 	
 	private File auditLog;
+	private File salesReport;
+	private PrintWriter salesFile;
 	private PrintWriter diskFile;
 	private BigDecimal userFunds = new BigDecimal("0");
 	private ArrayList<String> consumeSounds = new ArrayList<String>();
@@ -38,11 +40,18 @@ public class VendingMachineCLI {
 
 	public VendingMachineCLI(Menu menu) {
 		auditLog = new File("audit_log.txt");
+		salesReport = new File("sales_report.txt");
 		try {
 			diskFile = new PrintWriter(auditLog);
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
+		try {
+			salesFile = new PrintWriter(salesReport);
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+		this.menu = menu;
 		this.menu = menu;
 	}
 
@@ -63,7 +72,9 @@ public class VendingMachineCLI {
 			} else if (choice.equals(MAIN_MENU_OPTION_PURCHASE)) {
 				purchaseMenu(machineInventory);
 			} else if (choice.equals(MAIN_MENU_OPTION_EXIT)) {
+				salesReport(machineInventory);
 				diskFile.close();
+				salesFile.close();
 				return;
 			}
 		}
@@ -160,28 +171,28 @@ public class VendingMachineCLI {
 	public void makeChange() {
 		BigDecimal previousFunds = this.userFunds;
 		this.userFunds = this.userFunds.multiply(new BigDecimal("100"));
-		double parseFunds = Double.parseDouble(this.userFunds.toString());
-		int totalFunds = (int)parseFunds;
+		int totalFunds = this.userFunds.intValue();
 		int dollars = 0;
 		int quarters = 0;
 		int dimes = 0;
 		int nickels = 0;
 		// make change loop to determine coin amounts
-		while (totalFunds > 0) {
-			if (totalFunds > 100) {
+			if (totalFunds >= 100) {
 				dollars = totalFunds / 100;
 				totalFunds = totalFunds % 100;
-			} else if (totalFunds > 25) {
+			}
+			if (totalFunds >= 25) {
 				quarters = totalFunds / 25;
 				totalFunds = totalFunds % 25;
-			} else if (totalFunds > 10) {
+			} 
+			if (totalFunds >= 10) {
 				dimes = totalFunds / 10;
 				totalFunds = totalFunds % 10;
-			} else if (totalFunds > 5) {
+			}
+			if (totalFunds >= 5) {
 				nickels = totalFunds / 5;
 				totalFunds = totalFunds % 5;
 			}
-		}
 		// output change to user
 		System.out.println("");
 		System.out.println("Your change is: " + dollars + " dollars "
@@ -201,6 +212,28 @@ public class VendingMachineCLI {
 		String dateLine = dateFormat.format(new Date()).toString();
 		try {
 			diskFile.printf("%1$-20s %2$-18s %3$-9s %4$5s", dateLine, action, "$" + String.format("%.2f", previousFunds), "$" + String.format("%.2f", this.userFunds) + "\n");
+		}
+		catch(Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void salesReport(Inventory machine) {
+		Set<String> keySet = machine.inventoryAccess.keySet();
+		BigDecimal totalSales = new BigDecimal("0");
+		
+		try {
+			for (String slot : keySet) {
+				salesFile.print(machine.inventoryAccess.get(slot).getName() + " | " +
+						(5 - machine.inventoryAccess.get(slot).getQuantity()) + "\n");
+				if ((5 - machine.inventoryAccess.get(slot).getQuantity()) > 0) {
+					for (int i=1; i<=(5 - machine.inventoryAccess.get(slot).getQuantity()); ++i) {
+						totalSales = totalSales.add(machine.inventoryAccess.get(slot).getCost());
+					}
+				}
+			}
+			salesFile.println();
+			salesFile.print("***Total Sales*** $" + totalSales.toString());
 		}
 		catch(Exception e) {
 			e.printStackTrace();
