@@ -27,7 +27,7 @@ public class Snack {
 
 	@Override
 	public String toString() {
-		return this.getName() + this.getCost() + "  remaining: " + this.getQuantity();
+		return String.format("%1$-20s %2$-10s %3$-9s" , this.getName() , this.getCost() , "  remaining: " + this.getQuantity());
 	}
 
 	public int getQuantity() {

@@ -74,6 +74,7 @@ public class VendingMachineCLI {
 		Scanner moneySlot = new Scanner(System.in);
 		
 		while (true) {
+			// call method to clear screen
 			System.out.println("*****| Machine accepts $1, $2, $5, $10 |*****");
 			System.out.println("Please insert money (enter 'Q' when finished): ");
 			String money = moneySlot.next();
@@ -113,6 +114,7 @@ public class VendingMachineCLI {
 		Set<String> keySet = machine.inventoryAccess.keySet();
 		
 		while (true) {
+			// call method to clear the screen
 			System.out.println("***| Which item would you like to purchase? |***");
 			System.out.println("Enter item slot or enter 'Q' when finished): ");
 			String item = itemPurchase.next();
